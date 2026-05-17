@@ -7,8 +7,43 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+      #tela-bloqueio {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.95);
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      }
+      .bloqueio-card {
+        width: 100%;
+        max-width: 360px;
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 12px 30px rgba(0,0,0,.25);
+      }
+      .bloqueio-card h3 { margin: 0 0 8px; }
+      .bloqueio-card p { margin: 0 0 14px; color: #555; }
+      .bloqueio-erro { color: #c62828; font-size: 13px; min-height: 18px; margin-top: 8px; }
+      .config-senha-box { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 16px; max-width: 520px; }
+      .config-senha-feedback { min-height: 18px; font-size: 13px; margin-top: 8px; }
+    </style>
 </head>
 <body>
+    <div id="tela-bloqueio">
+      <div class="bloqueio-card">
+        <h3>🔒 Acesso ao Sistema</h3>
+        <p>Digite a senha para continuar.</p>
+        <input type="password" id="input-senha-acesso" class="form-control" placeholder="Senha" />
+        <button id="btn-desbloquear" class="btn btn-primary" style="width:100%;margin-top:10px;">Entrar</button>
+        <div id="erro-senha-acesso" class="bloqueio-erro"></div>
+      </div>
+    </div>
+
     <div class="container">
         <!-- Header -->
         <header class="header">
@@ -42,6 +77,10 @@
                 <li class="nav-item" data-page="volume">
                     <span class="nav-icon">📊</span>
                     <span class="nav-text">Volume</span>
+                </li>
+                <li class="nav-item" data-page="configuracoes">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">Configurações</span>
                 </li>
             </ul>
         </nav>
@@ -384,6 +423,23 @@
                     <div id="volume-anos-container"></div>
                 </div>
             </section>
+
+            <section id="pagina-configuracoes" class="page">
+                <div class="page-header">
+                    <h2>Configurações</h2>
+                </div>
+                <div class="page-content">
+                    <div class="config-senha-box">
+                        <h3>🔐 Alterar Senha</h3>
+                        <div class="form-group">
+                            <label for="nova-senha-sistema">Nova senha</label>
+                            <input type="password" id="nova-senha-sistema" class="form-control" placeholder="Digite a nova senha">
+                        </div>
+                        <button id="btn-alterar-senha" class="btn btn-primary">Salvar nova senha</button>
+                        <div id="config-senha-feedback" class="config-senha-feedback"></div>
+                    </div>
+                </div>
+            </section>
         </main>
         </div>
     </div>
@@ -412,6 +468,9 @@
 
       let carregouMateriais = false;
       let carregouServicos = false;
+      let carregouSenha = false;
+      let senhaNuvem = '7424';
+      let sistemaDesbloqueado = false;
 
       onValue(ref(db, 'marmoraria_materiais'), (snapshot) => {
           window.materiais = snapshot.val() || [];
@@ -429,8 +488,45 @@
           window.orcamentos = snapshot.val() || [];
       });
 
+      onValue(ref(db, 'marmoraria_config/senha'), (snapshot) => {
+          const valor = snapshot.val();
+          if (!valor) {
+              senhaNuvem = '7424';
+              window.salvarDadosNaNuvem('marmoraria_config/senha', '7424');
+          } else {
+              senhaNuvem = String(valor);
+          }
+          carregouSenha = true;
+          verificarEInicializar();
+      });
+
+      const inputSenhaAcesso = document.getElementById('input-senha-acesso');
+      const btnDesbloquear = document.getElementById('btn-desbloquear');
+      const erroSenhaAcesso = document.getElementById('erro-senha-acesso');
+      const telaBloqueio = document.getElementById('tela-bloqueio');
+
+      function tentarDesbloquear() {
+          if (!carregouSenha) {
+              erroSenhaAcesso.textContent = 'Aguarde carregar a senha da nuvem...';
+              return;
+          }
+          if ((inputSenhaAcesso.value || '').trim() === senhaNuvem) {
+              sistemaDesbloqueado = true;
+              telaBloqueio.style.display = 'none';
+              erroSenhaAcesso.textContent = '';
+              verificarEInicializar();
+              return;
+          }
+          erroSenhaAcesso.textContent = 'Senha incorreta.';
+      }
+
+      btnDesbloquear.addEventListener('click', tentarDesbloquear);
+      inputSenhaAcesso.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') tentarDesbloquear();
+      });
+
       function verificarEInicializar() {
-          if (carregouMateriais && carregouServicos) {
+          if (carregouMateriais && carregouServicos && carregouSenha && sistemaDesbloqueado) {
               if (typeof window.inicializarSistemaMarmoraria === 'function') {
                   window.inicializarSistemaMarmoraria();
               }

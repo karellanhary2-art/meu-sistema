@@ -660,6 +660,35 @@ document.addEventListener('DOMContentLoaded', function() {
         sincronizarDadosDoFirebaseERenderizar();
     };
 
+    function inicializarAlteracaoSenha() {
+        var btnAlterarSenha = document.getElementById('btn-alterar-senha');
+        var inputNovaSenha = document.getElementById('nova-senha-sistema');
+        var feedbackSenha = document.getElementById('config-senha-feedback');
+
+        if (!btnAlterarSenha || !inputNovaSenha || !feedbackSenha) return;
+
+        function salvarNovaSenha() {
+            var novaSenha = (inputNovaSenha.value || '').trim();
+            if (!novaSenha) {
+                feedbackSenha.textContent = 'Digite uma nova senha válida.';
+                feedbackSenha.style.color = '#c62828';
+                return;
+            }
+
+            salvarNaNuvemSeDisponivel('marmoraria_config/senha', novaSenha);
+            feedbackSenha.textContent = 'Senha alterada com sucesso!';
+            feedbackSenha.style.color = '#2e7d32';
+            inputNovaSenha.value = '';
+        }
+
+        btnAlterarSenha.addEventListener('click', salvarNovaSenha);
+        inputNovaSenha.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') salvarNovaSenha();
+        });
+    }
+
+    inicializarAlteracaoSenha();
+
     // Fallback para garantir funcionamento mesmo sem callback do Firebase
     setTimeout(function() {
         if (!sistemaProntoComDados) {
