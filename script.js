@@ -5,14 +5,22 @@ let materiais = [];
 let proximoIdMaterial = 1;
 window.materiais = materiais; // Compartilha com a nuvem
 
+let sistemaProntoComDados = false;
+
+function salvarNaNuvemSeDisponivel(caminho, dados) {
+    if (typeof window.salvarDadosNaNuvem === 'function') {
+        window.salvarDadosNaNuvem(caminho, dados);
+    }
+}
+
 function salvarMateriais() {
-    window.salvarDadosNaNuvem('marmoraria_materiais', materiais);
-    window.salvarDadosNaNuvem('marmoraria_proximoIdMaterial', proximoIdMaterial);
+    window.materiais = materiais;
+    salvarNaNuvemSeDisponivel('marmoraria_materiais', materiais);
+    salvarNaNuvemSeDisponivel('marmoraria_proximoIdMaterial', proximoIdMaterial);
 }
 
 function carregarMateriais() {
-    // Agora os dados vêm da nuvem automaticamente!
-    if (window.materiais && window.materiais.length > 0) {
+    if (Array.isArray(window.materiais)) {
         materiais = window.materiais;
         return true;
     }
@@ -25,12 +33,13 @@ let proximoIdServico = 1;
 window.servicos = servicos; // Compartilha com a nuvem
 
 function salvarServicos() {
-    window.salvarDadosNaNuvem('marmoraria_servicos', servicos);
-    window.salvarDadosNaNuvem('marmoraria_proximoIdServico', proximoIdServico);
+    window.servicos = servicos;
+    salvarNaNuvemSeDisponivel('marmoraria_servicos', servicos);
+    salvarNaNuvemSeDisponivel('marmoraria_proximoIdServico', proximoIdServico);
 }
 
 function carregarServicos() {
-    if (window.servicos && window.servicos.length > 0) {
+    if (Array.isArray(window.servicos)) {
         servicos = window.servicos;
         return true;
     }
@@ -44,13 +53,14 @@ let orcamentoAtualId = null;
 window.orcamentos = orcamentos; // Compartilha com a nuvem
 
 function salvarOrcamentos() {
-    window.salvarDadosNaNuvem('marmoraria_orcamentos', orcamentos);
-    window.salvarDadosNaNuvem('marmoraria_proximoIdOrcamento', proximoIdOrcamento);
-    window.salvarDadosNaNuvem('marmoraria_orcamentoAtualId', orcamentoAtualId || 0);
+    window.orcamentos = orcamentos;
+    salvarNaNuvemSeDisponivel('marmoraria_orcamentos', orcamentos);
+    salvarNaNuvemSeDisponivel('marmoraria_proximoIdOrcamento', proximoIdOrcamento);
+    salvarNaNuvemSeDisponivel('marmoraria_orcamentoAtualId', orcamentoAtualId || 0);
 }
 
 function carregarOrcamentos() {
-    if (window.orcamentos && window.orcamentos.length > 0) {
+    if (Array.isArray(window.orcamentos)) {
         orcamentos = window.orcamentos;
         return true;
     }
@@ -569,39 +579,99 @@ document.addEventListener('DOMContentLoaded', function() {
 
     carregarAnosVolume();
 
-    // ===== MATERIAIS =====
-    if (!carregarMateriais()) {
-        materiais = [
-            { id: 1, nome: 'Amarelo Icaraí', valor: 500 },
-            { id: 2, nome: 'Andorinha', valor: 450 },
-            { id: 3, nome: 'Bege Bahia', valor: 600 },
-            { id: 4, nome: 'Branco Dallas', valor: 500 },
-            { id: 5, nome: 'Branco Flameado', valor: 600 },
-            { id: 6, nome: 'Branco Fortaleza', valor: 500 },
-            { id: 7, nome: 'Branco Itaunas Escovado', valor: 650 },
-            { id: 8, nome: 'Branco Itaúna', valor: 600 },
-            { id: 9, nome: 'Branco Paraná', valor: 1500 },
-            { id: 10, nome: 'Corumbá', valor: 400 },
-            { id: 11, nome: 'Florença', valor: 600 },
-            { id: 12, nome: 'Mármore Branco', valor: 500 },
-            { id: 13, nome: 'Ocre', valor: 400 },
-            { id: 14, nome: 'Ornamental', valor: 500 },
-            { id: 15, nome: 'Preto Indiano', valor: 500 },
-            { id: 16, nome: 'Preto São Gabriel', valor: 600 },
-            { id: 17, nome: 'Preto São Gabriel Escovado', valor: 700 },
-            { id: 18, nome: 'Preto Via Láctea', valor: 700 },
-            { id: 19, nome: 'Quartzo', valor: 1000 },
-            { id: 20, nome: 'Verde Ubatuba', valor: 450 }
-        ];
-        proximoIdMaterial = 21;
-        salvarMateriais();
+    const materiaisPadrao = [
+        { id: 1, nome: 'Amarelo Icaraí', valor: 500 },
+        { id: 2, nome: 'Andorinha', valor: 450 },
+        { id: 3, nome: 'Bege Bahia', valor: 600 },
+        { id: 4, nome: 'Branco Dallas', valor: 500 },
+        { id: 5, nome: 'Branco Flameado', valor: 600 },
+        { id: 6, nome: 'Branco Fortaleza', valor: 500 },
+        { id: 7, nome: 'Branco Itaunas Escovado', valor: 650 },
+        { id: 8, nome: 'Branco Itaúna', valor: 600 },
+        { id: 9, nome: 'Branco Paraná', valor: 1500 },
+        { id: 10, nome: 'Corumbá', valor: 400 },
+        { id: 11, nome: 'Florença', valor: 600 },
+        { id: 12, nome: 'Mármore Branco', valor: 500 },
+        { id: 13, nome: 'Ocre', valor: 400 },
+        { id: 14, nome: 'Ornamental', valor: 500 },
+        { id: 15, nome: 'Preto Indiano', valor: 500 },
+        { id: 16, nome: 'Preto São Gabriel', valor: 600 },
+        { id: 17, nome: 'Preto São Gabriel Escovado', valor: 700 },
+        { id: 18, nome: 'Preto Via Láctea', valor: 700 },
+        { id: 19, nome: 'Quartzo', valor: 1000 },
+        { id: 20, nome: 'Verde Ubatuba', valor: 450 }
+    ];
+
+    const servicosPadrao = [
+        { id: 1, nome: 'Corte 45°', valor: 80 },
+        { id: 2, nome: 'Corte', valor: 100 },
+        { id: 3, nome: 'Cuba Oval', valor: 150 },
+        { id: 4, nome: 'Cuba Inox 1 ou 2', valor: 300 },
+        { id: 5, nome: 'Cuba Sobrepor', valor: 400 }
+    ];
+
+    function sincronizarDadosDoFirebaseERenderizar() {
+        carregarMateriais();
+        carregarServicos();
+        carregarOrcamentos();
+
+        if (!Array.isArray(materiais) || materiais.length === 0) {
+            materiais = materiaisPadrao.slice();
+            proximoIdMaterial = 21;
+            salvarMateriais();
+        } else {
+            proximoIdMaterial = materiais.reduce(function(maxId, item) {
+                return Math.max(maxId, Number(item.id) || 0);
+            }, 0) + 1;
+        }
+
+        if (!Array.isArray(servicos) || servicos.length === 0) {
+            servicos = servicosPadrao.slice();
+            proximoIdServico = 6;
+            salvarServicos();
+        } else {
+            proximoIdServico = servicos.reduce(function(maxId, item) {
+                return Math.max(maxId, Number(item.id) || 0);
+            }, 0) + 1;
+        }
+
+        if (!Array.isArray(orcamentos)) {
+            orcamentos = [];
+        }
+        proximoIdOrcamento = orcamentos.reduce(function(maxId, item) {
+            return Math.max(maxId, Number(item.id) || 0);
+        }, 0) + 1;
+
+        window.materiais = materiais;
+        window.servicos = servicos;
+        window.orcamentos = orcamentos;
+
+        renderTabelaMateriais();
+        renderTabelaServicos();
+        popularSelectMateriais();
+        popularSelectCortes();
+        renderTabelaOrcamentos();
+        renderResumoVolume();
+
+        sistemaProntoComDados = true;
     }
-    renderTabelaMateriais();
+
+    window.inicializarSistemaMarmoraria = function() {
+        sincronizarDadosDoFirebaseERenderizar();
+    };
+
+    // Fallback para garantir funcionamento mesmo sem callback do Firebase
+    setTimeout(function() {
+        if (!sistemaProntoComDados) {
+            sincronizarDadosDoFirebaseERenderizar();
+        }
+    }, 500);
 
     document.getElementById('btn-adicionar-material').addEventListener('click', function() { abrirModalMaterial(null); });
     document.querySelector('#modal-material .modal-close').addEventListener('click', fecharModalMaterial);
     document.getElementById('btn-cancelar-modal').addEventListener('click', fecharModalMaterial);
     document.getElementById('btn-salvar-material').addEventListener('click', function() {
+        if (!sistemaProntoComDados) { alert('Aguarde o carregamento dos dados da nuvem.'); return; }
         var idHidden = document.getElementById('material-id');
         var nome = document.getElementById('material-nome').value.trim();
         var valorStr = document.getElementById('material-valor').value.replace(',', '.');
@@ -624,23 +694,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ===== SERVIÇOS =====
-    if (!carregarServicos()) {
-        servicos = [
-            { id: 1, nome: 'Corte 45°', valor: 80 },
-            { id: 2, nome: 'Corte', valor: 100 },
-            { id: 3, nome: 'Cuba Oval', valor: 150 },
-            { id: 4, nome: 'Cuba Inox 1 ou 2', valor: 300 },
-            { id: 5, nome: 'Cuba Sobrepor', valor: 400 }
-        ];
-        proximoIdServico = 6;
-        salvarServicos();
-    }
-    renderTabelaServicos();
 
     document.getElementById('btn-adicionar-servico').addEventListener('click', function() { abrirModalServico(null); });
     document.querySelector('#modal-servico .modal-close-servico').addEventListener('click', fecharModalServico);
     document.getElementById('btn-cancelar-modal-servico').addEventListener('click', fecharModalServico);
     document.getElementById('btn-salvar-servico').addEventListener('click', function() {
+        if (!sistemaProntoComDados) { alert('Aguarde o carregamento dos dados da nuvem.'); return; }
         var idHidden = document.getElementById('servico-id');
         var nome = document.getElementById('servico-nome').value.trim();
         var valorStr = document.getElementById('servico-valor').value.replace(',', '.');
@@ -662,7 +721,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ===== ORÇAMENTO - Select de Materiais =====
-    popularSelectMateriais();
 
     document.getElementById('orc-material').addEventListener('change', function() {
         var selectedId = parseInt(this.value);
@@ -1114,14 +1172,8 @@ document.addEventListener('DOMContentLoaded', function() {
         popularSelectCortes();
         observarMudancasNoOrcamento();
 
-        // Carregar orçamentos salvos
-        if (!carregarOrcamentos()) {
-            orcamentos = [];
-            proximoIdOrcamento = 1;
-            salvarOrcamentos();
-        }
-
-        renderTabelaOrcamentos();
+        // Carregamento e renderização inicial dos orçamentos agora ocorre em
+        // `window.inicializarSistemaMarmoraria()` para sincronizar com Firebase.
 
         // Função para salvar orçamento
         function salvarOrcamento() {
