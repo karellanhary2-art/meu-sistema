@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marmoraria Helena</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="logo">Marmoraria Helena</h1>
+        </header>
+
+        <div class="body-layout">
+        <!-- Navegação Lateral -->
+        <nav class="sidebar">
+            <ul class="nav-menu">
+                <li class="nav-item active" data-page="inicio">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-text">Início</span>
+                </li>
+                <li class="nav-item" data-page="orcamento">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-text">Novo Orçamento</span>
+                </li>
+                <li class="nav-item" data-page="historico">
+                    <span class="nav-icon">📚</span>
+                    <span class="nav-text">Histórico</span>
+                </li>
+                <li class="nav-item" data-page="materiais">
+                    <span class="nav-icon">🪨</span>
+                    <span class="nav-text">Materiais</span>
+                </li>
+                <li class="nav-item" data-page="servico">
+                    <span class="nav-icon">🔧</span>
+                    <span class="nav-text">Serviço</span>
+                </li>
+                <li class="nav-item" data-page="volume">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Volume</span>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Página Início -->
+            <section id="pagina-inicio" class="page active">
+                <div class="welcome-section">
+                    <h2>Bem-vindo à Marmoraria Helena</h2>
+                    <p class="welcome-text">Selecione uma opção abaixo para começar</p>
+                </div>
+
+                <div class="shortcuts-grid">
+                    <a href="#" class="shortcut-card" data-navigate="orcamento">
+                        <span class="shortcut-icon">📋</span>
+                        <span class="shortcut-title">Novo Orçamento</span>
+                        <span class="shortcut-desc">Crie um novo orçamento para seus clientes</span>
+                    </a>
+
+                    <a href="#" class="shortcut-card" data-navigate="historico">
+                        <span class="shortcut-icon">📚</span>
+                        <span class="shortcut-title">Histórico</span>
+                        <span class="shortcut-desc">Visualize o histórico de orçamentos</span>
+                    </a>
+
+                    <a href="#" class="shortcut-card" data-navigate="materiais">
+                        <span class="shortcut-icon">🪨</span>
+                        <span class="shortcut-title">Materiais</span>
+                        <span class="shortcut-desc">Gerencie os materiais disponíveis</span>
+                    </a>
+
+                    <a href="#" class="shortcut-card" data-navigate="servico">
+                        <span class="shortcut-icon">🔧</span>
+                        <span class="shortcut-title">Serviço</span>
+                        <span class="shortcut-desc">Gerencie os tipos de serviço</span>
+                    </a>
+
+                    <a href="#" class="shortcut-card" data-navigate="volume">
+                        <span class="shortcut-icon">📊</span>
+                        <span class="shortcut-title">Volume</span>
+                        <span class="shortcut-desc">Acompanhe o volume de produção</span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Página Novo Orçamento -->
+            <section id="pagina-orcamento" class="page">
+                <div class="page-header">
+                    <h2>Novo Orçamento</h2>
+                    <button class="btn-gerar-pdf" id="btn-gerar-pdf">📄 Gerar PDF</button>
+                </div>
+                <div class="page-content">
+                    <div class="orcamento-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="orc-nome">Nome do Cliente</label>
+                                <input type="text" id="orc-nome" class="form-control" placeholder="Nome do cliente">
+                            </div>
+                            <div class="form-group">
+                                <label for="orc-celular">Celular</label>
+                                <input type="text" id="orc-celular" class="form-control" placeholder="(11) 99999-9999">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="orc-endereco">Endereço</label>
+                                <input type="text" id="orc-endereco" class="form-control" placeholder="Endereço do cliente">
+                            </div>
+                            <div class="form-group">
+                                <label for="orc-status">Status</label>
+                                <select id="orc-status" class="form-control">
+                                    <option value="Orçamento">Orçamento</option>
+                                    <option value="Aprovado">Aprovado</option>
+                                    <option value="Cancelado">Cancelado</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="orcamento-divisoria">
+                            <h3 class="orcamento-secao-titulo">Material / Pedra</h3>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="orc-material">Selecione o Material</label>
+                                <select id="orc-material" class="form-control">
+                                    <option value="">Selecione...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="orc-material-valor">Valor Unitário (R$)</label>
+                                <input type="text" id="orc-material-valor" class="form-control" placeholder="Ex: 500,00" inputmode="decimal">
+                            </div>
+                        </div>
+
+                        <div class="orcamento-divisoria">
+                            <h3 class="orcamento-secao-titulo">Peças (Metragem)</h3>
+                        </div>
+
+                        <div class="pecas-toolbar">
+                        </div>
+
+                        <div id="pecas-container">
+                            <!-- Peças e separadores serão inseridos aqui -->
+                        </div>
+
+                        <div class="orcamento-divisoria">
+                            <h3 class="orcamento-secao-titulo">Cubas</h3>
+                        </div>
+
+                        <div class="cubas-toolbar">
+                            <button class="btn btn-primary btn-adicionar-cuba">Adicionar Cuba</button>
+                        </div>
+
+                        <div id="cubas-container">
+                            <!-- Cubas serão inseridas aqui -->
+                        </div>
+
+                        <div class="orcamento-divisoria">
+                            <h3 class="orcamento-secao-titulo">Forma de Pagamento</h3>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Cartão</label>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <button class="btn-toggle-cartao" id="btn-toggle-cartao">💳 Cartão</button>
+                                    <div class="cartao-tax-container" id="cartao-tax-container" style="display: none;">
+                                        <span style="margin-right: 5px;">Taxa:</span>
+                                        <input type="text" class="form-control cartao-taxa" id="cartao-taxa" value="12" style="width: 60px;">
+                                        <span style="margin-left: 5px;">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="orcamento-divisoria">
+                            <h3 class="orcamento-secao-titulo">Cortes</h3>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="orc-cortes">Serviço de Corte</label>
+                                <select id="orc-cortes" class="form-control">
+                                    <option value="">Selecione um serviço de corte...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="orc-cortes-valor">Valor do Corte</label>
+                                <input type="text" id="orc-cortes-valor" class="form-control" placeholder="R$ 0,00" readonly>
+                            </div>
+                        </div>
+
+                        <div class="orcamento-divisoria">
+                            <h3 class="orcamento-secao-titulo">Resumo do Orçamento</h3>
+                        </div>
+
+                        <div class="resumo-orcamento">
+                            <div class="resumo-item">
+                                <span class="resumo-label">Peças (Metragem):</span>
+                                <span class="resumo-valor" id="resumo-pecas">R$ 0,00</span>
+                            </div>
+                            <div class="resumo-item">
+                                <span class="resumo-label">Cubas:</span>
+                                <span class="resumo-valor" id="resumo-cubas">R$ 0,00</span>
+                            </div>
+                            <div class="resumo-item">
+                                <span class="resumo-label">Cortes:</span>
+                                <span class="resumo-valor" id="resumo-cortes">R$ 0,00</span>
+                            </div>
+                            <div class="resumo-item" id="resumo-subtotal-container">
+                                <span class="resumo-label">Subtotal:</span>
+                                <span class="resumo-valor" id="resumo-subtotal">R$ 0,00</span>
+                            </div>
+                            <div class="resumo-item" id="resumo-cartao-container" style="display: none;">
+                                <span class="resumo-label">Taxa Cartão (12%):</span>
+                                <span class="resumo-valor" id="resumo-taxa-cartao">R$ 0,00</span>
+                            </div>
+                            <div class="resumo-item total">
+                                <span class="resumo-label">Total Final:</span>
+                                <span class="resumo-valor" id="resumo-total">R$ 0,00</span>
+                            </div>
+                        </div>
+
+                        <div class="orcamento-divisoria">
+                            <h3 class="orcamento-secao-titulo">Observações</h3>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="orc-observacoes">Observações</label>
+                                <textarea id="orc-observacoes" class="form-control" rows="3" placeholder="Digite aqui qualquer observação adicional..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Página Histórico -->
+            <section id="pagina-historico" class="page">
+                <div class="page-header">
+                    <h2>Histórico de Orçamentos</h2>
+                </div>
+                <div class="page-content">
+                    <table class="materiais-tabela">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Material</th>
+                                <th>Total (R$)</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-orcamentos-corpo">
+                            <!-- Linhas serão inseridas via JS -->
+                        </tbody>
+                    </table>
+                    <p id="orcamentos-vazio" class="placeholder-text">Nenhum orçamento salvo.</p>
+                </div>
+            </section>
+
+            <!-- Página Materiais -->
+            <section id="pagina-materiais" class="page">
+                <div class="page-header">
+                    <h2>Materiais</h2>
+                </div>
+                <div class="page-content">
+                    <div class="materiais-toolbar">
+                        <button class="btn btn-primary" id="btn-adicionar-material">+ Novo Material</button>
+                    </div>
+                    <table class="materiais-tabela">
+                        <thead>
+                            <tr>
+                                <th>Material</th>
+                                <th>Valor (m²)</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-materiais-corpo">
+                            <!-- Linhas serão inseridas via JS -->
+                        </tbody>
+                    </table>
+                    <p id="materiais-vazio" class="placeholder-text">Nenhum material cadastrado.</p>
+                </div>
+            </section>
+
+            <!-- Modal para adicionar/editar material -->
+            <div id="modal-material" class="modal-overlay" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="modal-titulo">Novo Material</h3>
+                        <span class="modal-close">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <form id="form-material" novalidate>
+                            <input type="hidden" id="material-id" value="">
+                            <div class="form-group">
+                                <label for="material-nome">Nome do Material</label>
+                                <input type="text" id="material-nome" class="form-control" placeholder="Ex: Granito Preto Absoluto" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="material-valor">Valor (m²) - R$</label>
+                                <input type="text" id="material-valor" class="form-control" placeholder="Ex: 500,00" inputmode="decimal" required>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-cancelar" id="btn-cancelar-modal">Cancelar</button>
+                                <button type="button" class="btn btn-primary" id="btn-salvar-material">Salvar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Página Serviço -->
+            <section id="pagina-servico" class="page">
+                <div class="page-header">
+                    <h2>Serviço</h2>
+                </div>
+                <div class="page-content">
+                    <div class="materiais-toolbar">
+                        <button class="btn btn-primary" id="btn-adicionar-servico">+ Novo Serviço</button>
+                    </div>
+                    <table class="materiais-tabela">
+                        <thead>
+                            <tr>
+                                <th>Serviço</th>
+                                <th>Valor</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-servicos-corpo">
+                            <!-- Linhas serão inseridas via JS -->
+                        </tbody>
+                    </table>
+                    <p id="servicos-vazio" class="placeholder-text">Nenhum serviço cadastrado.</p>
+                </div>
+            </section>
+
+            <!-- Modal para adicionar/editar serviço -->
+            <div id="modal-servico" class="modal-overlay" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="modal-titulo-servico">Novo Serviço</h3>
+                        <span class="modal-close-servico">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <form id="form-servico" novalidate>
+                            <input type="hidden" id="servico-id" value="">
+                            <div class="form-group">
+                                <label for="servico-nome">Nome do Serviço</label>
+                                <input type="text" id="servico-nome" class="form-control" placeholder="Ex: Corte 45°" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="servico-valor">Valor - R$</label>
+                                <input type="text" id="servico-valor" class="form-control" placeholder="Ex: 80,00" inputmode="decimal" required>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-cancelar" id="btn-cancelar-modal-servico">Cancelar</button>
+                                <button type="button" class="btn btn-primary" id="btn-salvar-servico">Salvar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Página Volume -->
+            <section id="pagina-volume" class="page">
+                <div class="page-header">
+                    <h2>Volume</h2>
+                </div>
+                <div class="page-content">
+                    <div class="volume-header">
+                        <h3>Resumo por Ano / Mês</h3>
+                        <div class="volume-header-actions">
+                            <button id="btn-adicionar-ano" class="btn-volume-acao btn-volume-acao-add" title="Adicionar novo ano">+ Ano</button>
+                        </div>
+                    </div>
+                    <div id="volume-anos-container"></div>
+                </div>
+            </section>
+        </main>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

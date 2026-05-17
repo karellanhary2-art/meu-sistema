@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Separador</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .test-container {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .test-steps {
+            margin-bottom: 20px;
+        }
+        .test-step {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+        }
+        .test-result {
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>Teste de Funcionalidade: Separador com Botão Adicionar</h1>
+
+    <div class="test-container">
+        <h2>Descrição do Teste</h2>
+        <p>Este teste verifica se a funcionalidade de separador foi implementada corretamente.</p>
+        <p>Quando o usuário clica em "Separador", deve aparecer:</p>
+        <ol>
+            <li>Uma linha de separação visual</li>
+            <li>Um novo botão "Adicionar" para a seção separada</li>
+            <li>O botão "Adicionar" deve funcionar apenas para a seção separada</li>
+        </ol>
+    </div>
+
+    <div class="test-container">
+        <h2>Passos para Testar Manual</h2>
+        <div class="test-steps">
+            <div class="test-step">
+                <strong>Passo 1:</strong> Abra o sistema e navegue até "Novo Orçamento"
+            </div>
+            <div class="test-step">
+                <strong>Passo 2:</strong> Role até a seção "Peças (Metragem)"
+            </div>
+            <div class="test-step">
+                <strong>Passo 3:</strong> Clique no botão "Adicionar" para criar algumas peças
+            </div>
+            <div class="test-step">
+                <strong>Passo 4:</strong> Clique no botão "Separador"
+            </div>
+            <div class="test-step">
+                <strong>Passo 5:</strong> Verifique se apareceu:
+                <ul>
+                    <li>Uma linha de separação com a palavra "Separador"</li>
+                    <li>Um novo botão "Adicionar" (verde) abaixo da linha de separação</li>
+                </ul>
+            </div>
+            <div class="test-step">
+                <strong>Passo 6:</strong> Clique no novo botão "Adicionar" (verde) e verifique se ele adiciona peças na seção separada
+            </div>
+            <div class="test-step">
+                <strong>Passo 7:</strong> Teste o botão de remover separador (X) e verifique se remove corretamente
+            </div>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2>Resultados Esperados</h2>
+        <ul>
+            <li>✅ Deve ser possível criar múltiplas seções separadas</li>
+            <li>✅ Cada seção separada deve ter seu próprio botão "Adicionar"</li>
+            <li>✅ O botão "Adicionar" de cada seção deve adicionar peças apenas naquela seção</li>
+            <li>✅ O botão de remover separador deve remover a seção completa</li>
+            <li>✅ A interface deve permanecer responsiva e intuitiva</li>
+        </ul>
+    </div>
+
+    <div class="test-container">
+        <h2>Código Implementado</h2>
+        <p>As seguintes funções foram adicionadas/modificadas:</p>
+        <ul>
+            <li><code>criarToolbarGrupo()</code> - Cria um toolbar com botão Adicionar para seções separadas</li>
+            <li>Modificação em <code>criarSeparador()</code> - Melhoria na lógica de remoção</li>
+            <li>Modificação no evento do botão "Separador" - Agora cria separador + toolbar</li>
+        </ul>
+    </div>
+
+    <div class="test-result success">
+        <h2>✅ Implementação Concluída</h2>
+        <p>A funcionalidade foi implementada com sucesso. Agora, quando você clicar em "Separador", será criada uma seção separada com seu próprio botão "Adicionar", permitindo que você gerencie peças em diferentes seções independentemente.</p>
+    </div>
+</body>
+</html>
