@@ -388,8 +388,58 @@
         </div>
     </div>
 
-    <!-- Linha adicionada aqui -->
-    <script type="module" src="firebase-db.js"></script>
+    <!-- Conexão Firebase integrada diretamente -->
+    <script type="module">
+      import { initializeApp } from "https://gstatic.com";
+      import { getDatabase, ref, set, onValue } from "https://gstatic.com";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBQJd24stdXcD3ngwrMXytuVtwHU05DOck",
+        authDomain: "://firebaseapp.com",
+        databaseURL: "https://firebaseio.com",
+        projectId: "meu-sistema-52993",
+        storageBucket: "meu-sistema-52993.firebasestorage.app",
+        messagingSenderId: "25595083275",
+        appId: "1:25595083275:web:224b2d964819148005e50e"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+
+      window.salvarDadosNaNuvem = function(caminho, dados) {
+          set(ref(db, caminho), dados);
+      };
+
+      let carregouMateriais = false;
+      let carregouServicos = false;
+
+      onValue(ref(db, 'marmoraria_materiais'), (snapshot) => {
+          window.materiais = snapshot.val() || [];
+          carregouMateriais = true;
+          verificarEInicializar();
+      });
+
+      onValue(ref(db, 'marmoraria_servicos'), (snapshot) => {
+          window.servicos = snapshot.val() || [];
+          carregouServicos = true;
+          verificarEInicializar();
+      });
+
+      onValue(ref(db, 'marmoraria_orcamentos'), (snapshot) => {
+          window.orcamentos = snapshot.val() || [];
+      });
+
+      function verificarEInicializar() {
+          if (carregouMateriais && carregouServicos) {
+              if (typeof window.inicializarSistemaMarmoraria === 'function') {
+                  window.inicializarSistemaMarmoraria();
+              }
+          }
+      }
+    </script>
+
+    <!-- Seu arquivo de lógica original -->
     <script src="script.js"></script>
 </body>
 </html>
+>
