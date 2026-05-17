@@ -477,6 +477,8 @@
       let carregouSenha = false;
       let senhaNuvem = '7424';
       let sistemaDesbloqueado = false;
+      const CHAVE_SESSAO_LOGIN = 'marmoraria_login_expira_em';
+      const DURACAO_SESSAO_MS = 30 * 60 * 1000; // 30 minutos
 
       if (!db) {
           carregouMateriais = true;
@@ -524,6 +526,29 @@
       const erroSenhaAcesso = document.getElementById('erro-senha-acesso');
       const telaBloqueio = document.getElementById('tela-bloqueio');
 
+      function sessaoAindaValida() {
+          const expiraEm = Number(localStorage.getItem(CHAVE_SESSAO_LOGIN) || '0');
+          return expiraEm > Date.now();
+      }
+
+      function renovarSessaoLogin() {
+          const expiraEm = Date.now() + DURACAO_SESSAO_MS;
+          localStorage.setItem(CHAVE_SESSAO_LOGIN, String(expiraEm));
+      }
+
+      function aplicarEstadoInicialDeAcesso() {
+          if (sessaoAindaValida()) {
+              sistemaDesbloqueado = true;
+              telaBloqueio.style.display = 'none';
+              erroSenhaAcesso.textContent = '';
+          } else {
+              sistemaDesbloqueado = false;
+              telaBloqueio.style.display = 'flex';
+          }
+      }
+
+      aplicarEstadoInicialDeAcesso();
+
       function tentarDesbloquear() {
           const senhaDigitada = (inputSenhaAcesso.value || '').trim();
 
@@ -535,6 +560,7 @@
           // Valida contra senha da nuvem; se indisponível, senha padrão 7424.
           if (senhaDigitada === (senhaNuvem || '7424')) {
               sistemaDesbloqueado = true;
+              renovarSessaoLogin();
               telaBloqueio.style.display = 'none';
               erroSenhaAcesso.textContent = '';
               verificarEInicializar();
