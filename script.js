@@ -7,16 +7,12 @@ window.materiais = materiais; // Compartilha com a nuvem
 
 let sistemaProntoComDados = false;
 
-function salvarNaNuvemSeDisponivel(caminho, dados) {
-    if (typeof window.salvarDadosNaNuvem === 'function') {
-        window.salvarDadosNaNuvem(caminho, dados);
-    }
-}
-
 function salvarMateriais() {
     window.materiais = materiais;
-    salvarNaNuvemSeDisponivel('marmoraria_materiais', materiais);
-    salvarNaNuvemSeDisponivel('marmoraria_proximoIdMaterial', proximoIdMaterial);
+    if (typeof window.salvarDadosNaNuvem === 'function') {
+        window.salvarDadosNaNuvem('marmoraria_materiais', materiais);
+        window.salvarDadosNaNuvem('marmoraria_proximoIdMaterial', proximoIdMaterial);
+    }
 }
 
 function carregarMateriais() {
@@ -34,8 +30,10 @@ window.servicos = servicos; // Compartilha com a nuvem
 
 function salvarServicos() {
     window.servicos = servicos;
-    salvarNaNuvemSeDisponivel('marmoraria_servicos', servicos);
-    salvarNaNuvemSeDisponivel('marmoraria_proximoIdServico', proximoIdServico);
+    if (typeof window.salvarDadosNaNuvem === 'function') {
+        window.salvarDadosNaNuvem('marmoraria_servicos', servicos);
+        window.salvarDadosNaNuvem('marmoraria_proximoIdServico', proximoIdServico);
+    }
 }
 
 function carregarServicos() {
@@ -54,9 +52,11 @@ window.orcamentos = orcamentos; // Compartilha com a nuvem
 
 function salvarOrcamentos() {
     window.orcamentos = orcamentos;
-    salvarNaNuvemSeDisponivel('marmoraria_orcamentos', orcamentos);
-    salvarNaNuvemSeDisponivel('marmoraria_proximoIdOrcamento', proximoIdOrcamento);
-    salvarNaNuvemSeDisponivel('marmoraria_orcamentoAtualId', orcamentoAtualId || 0);
+    if (typeof window.salvarDadosNaNuvem === 'function') {
+        window.salvarDadosNaNuvem('marmoraria_orcamentos', orcamentos);
+        window.salvarDadosNaNuvem('marmoraria_proximoIdOrcamento', proximoIdOrcamento);
+        window.salvarDadosNaNuvem('marmoraria_orcamentoAtualId', orcamentoAtualId || 0);
+    }
 }
 
 function carregarOrcamentos() {
@@ -610,6 +610,21 @@ document.addEventListener('DOMContentLoaded', function() {
         { id: 5, nome: 'Cuba Sobrepor', valor: 400 }
     ];
 
+    function atualizarInterfaceMateriais() {
+        renderTabelaMateriais();
+        popularSelectMateriais();
+    }
+
+    function atualizarInterfaceServicos() {
+        renderTabelaServicos();
+        popularSelectCortes();
+    }
+
+    function atualizarInterfaceOrcamentos() {
+        renderTabelaOrcamentos();
+        renderResumoVolume();
+    }
+
     function sincronizarDadosDoFirebaseERenderizar() {
         carregarMateriais();
         carregarServicos();
@@ -646,18 +661,33 @@ document.addEventListener('DOMContentLoaded', function() {
         window.servicos = servicos;
         window.orcamentos = orcamentos;
 
-        renderTabelaMateriais();
-        renderTabelaServicos();
-        popularSelectMateriais();
-        popularSelectCortes();
-        renderTabelaOrcamentos();
-        renderResumoVolume();
+        atualizarInterfaceMateriais();
+        atualizarInterfaceServicos();
+        atualizarInterfaceOrcamentos();
 
         sistemaProntoComDados = true;
     }
 
     window.inicializarSistemaMarmoraria = function() {
-        sincronizarDadosDoFirebaseERenderizar();
+        materiais = Array.isArray(window.materiais) ? window.materiais : [];
+        servicos = Array.isArray(window.servicos) ? window.servicos : [];
+        orcamentos = Array.isArray(window.orcamentos) ? window.orcamentos : [];
+
+        proximoIdMaterial = materiais.reduce(function(maxId, item) {
+            return Math.max(maxId, Number(item.id) || 0);
+        }, 0) + 1;
+        proximoIdServico = servicos.reduce(function(maxId, item) {
+            return Math.max(maxId, Number(item.id) || 0);
+        }, 0) + 1;
+        proximoIdOrcamento = orcamentos.reduce(function(maxId, item) {
+            return Math.max(maxId, Number(item.id) || 0);
+        }, 0) + 1;
+
+        atualizarInterfaceMateriais();
+        atualizarInterfaceServicos();
+        atualizarInterfaceOrcamentos();
+
+        sistemaProntoComDados = true;
     };
 
     function inicializarAlteracaoSenha() {
@@ -675,7 +705,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            salvarNaNuvemSeDisponivel('marmoraria_config/senha', novaSenha);
+            if (typeof window.salvarDadosNaNuvem === 'function') {
+                window.salvarDadosNaNuvem('marmoraria_config/senha', novaSenha);
+            }
             feedbackSenha.textContent = 'Senha alterada com sucesso!';
             feedbackSenha.style.color = '#2e7d32';
             inputNovaSenha.value = '';

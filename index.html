@@ -488,17 +488,26 @@
           onValue(ref(db, 'marmoraria_materiais'), (snapshot) => {
               window.materiais = snapshot.val() || [];
               carregouMateriais = true;
+              if (typeof window.inicializarSistemaMarmoraria === 'function') {
+                  window.inicializarSistemaMarmoraria();
+              }
               verificarEInicializar();
           });
 
           onValue(ref(db, 'marmoraria_servicos'), (snapshot) => {
               window.servicos = snapshot.val() || [];
               carregouServicos = true;
+              if (typeof window.inicializarSistemaMarmoraria === 'function') {
+                  window.inicializarSistemaMarmoraria();
+              }
               verificarEInicializar();
           });
 
           onValue(ref(db, 'marmoraria_orcamentos'), (snapshot) => {
               window.orcamentos = snapshot.val() || [];
+              if (typeof window.inicializarSistemaMarmoraria === 'function') {
+                  window.inicializarSistemaMarmoraria();
+              }
           });
 
           onValue(ref(db, 'marmoraria_config/senha'), (snapshot) => {
