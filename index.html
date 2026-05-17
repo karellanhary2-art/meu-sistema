@@ -446,8 +446,8 @@
 
     <!-- Conexão Firebase integrada diretamente -->
     <script type="module">
-      import { initializeApp } from "https://gstatic.com";
-      import { getDatabase, ref, set, onValue } from "https://gstatic.com";
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+      import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyBQJd24stdXcD3ngwrMXytuVtwHU05DOck",
@@ -511,11 +511,15 @@
       const telaBloqueio = document.getElementById('tela-bloqueio');
 
       function tentarDesbloquear() {
+          const senhaDigitada = (inputSenhaAcesso.value || '').trim();
+
           if (!carregouSenha) {
               erroSenhaAcesso.textContent = 'Aguarde carregar a senha da nuvem...';
               return;
           }
-          if ((inputSenhaAcesso.value || '').trim() === senhaNuvem) {
+
+          // Valida contra senha da nuvem; se indisponível, senha padrão 7424.
+          if (senhaDigitada === (senhaNuvem || '7424')) {
               sistemaDesbloqueado = true;
               telaBloqueio.style.display = 'none';
               erroSenhaAcesso.textContent = '';
