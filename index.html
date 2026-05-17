@@ -451,18 +451,24 @@
 
       const firebaseConfig = {
         apiKey: "AIzaSyBQJd24stdXcD3ngwrMXytuVtwHU05DOck",
-        authDomain: "://firebaseapp.com",
-        databaseURL: "https://firebaseio.com",
+        authDomain: "meu-sistema-52993.firebaseapp.com",
+        databaseURL: "https://meu-sistema-52993-default-rtdb.firebaseio.com",
         projectId: "meu-sistema-52993",
         storageBucket: "meu-sistema-52993.firebasestorage.app",
         messagingSenderId: "25595083275",
         appId: "1:25595083275:web:224b2d964819148005e50e"
       };
 
-      const app = initializeApp(firebaseConfig);
-      const db = getDatabase(app);
+      let db = null;
+      try {
+          const app = initializeApp(firebaseConfig);
+          db = getDatabase(app);
+      } catch (e) {
+          console.error('Falha ao inicializar Firebase. Usando fallback local.', e);
+      }
 
       window.salvarDadosNaNuvem = function(caminho, dados) {
+          if (!db) return;
           set(ref(db, caminho), dados);
       };
 
@@ -472,38 +478,46 @@
       let senhaNuvem = '7424';
       let sistemaDesbloqueado = false;
 
-      onValue(ref(db, 'marmoraria_materiais'), (snapshot) => {
-          window.materiais = snapshot.val() || [];
+      if (!db) {
           carregouMateriais = true;
-          verificarEInicializar();
-      });
-
-      onValue(ref(db, 'marmoraria_servicos'), (snapshot) => {
-          window.servicos = snapshot.val() || [];
           carregouServicos = true;
-          verificarEInicializar();
-      });
+          carregouSenha = true;
+      } else {
+          onValue(ref(db, 'marmoraria_materiais'), (snapshot) => {
+              window.materiais = snapshot.val() || [];
+              carregouMateriais = true;
+              verificarEInicializar();
+          });
 
-      onValue(ref(db, 'marmoraria_orcamentos'), (snapshot) => {
-          window.orcamentos = snapshot.val() || [];
-      });
+          onValue(ref(db, 'marmoraria_servicos'), (snapshot) => {
+              window.servicos = snapshot.val() || [];
+              carregouServicos = true;
+              verificarEInicializar();
+          });
 
-      onValue(ref(db, 'marmoraria_config/senha'), (snapshot) => {
-          const valor = snapshot.val();
-          if (!valor) {
+          onValue(ref(db, 'marmoraria_orcamentos'), (snapshot) => {
+              window.orcamentos = snapshot.val() || [];
+          });
+
+          onValue(ref(db, 'marmoraria_config/senha'), (snapshot) => {
+              const valor = snapshot.val();
+              if (!valor) {
+                  senhaNuvem = '7424';
+                  window.salvarDadosNaNuvem('marmoraria_config/senha', '7424');
+              } else {
+                  senhaNuvem = String(valor);
+              }
+              carregouSenha = true;
+              verificarEInicializar();
+          }, () => {
+              // Fallback: se houver erro de leitura/permissão, mantém senha padrão
               senhaNuvem = '7424';
-              window.salvarDadosNaNuvem('marmoraria_config/senha', '7424');
-          } else {
-              senhaNuvem = String(valor);
-          }
-          carregouSenha = true;
-          verificarEInicializar();
-      }, () => {
-          // Fallback: se houver erro de leitura/permissão, mantém senha padrão
-          senhaNuvem = '7424';
-          carregouSenha = true;
-          verificarEInicializar();
-      });
+              carregouSenha = true;
+              verificarEInicializar();
+          });
+      }
+
+      verificarEInicializar();
 
       const inputSenhaAcesso = document.getElementById('input-senha-acesso');
       const btnDesbloquear = document.getElementById('btn-desbloquear');
@@ -557,4 +571,3 @@
     <script src="script.js"></script>
 </body>
 </html>
->
