@@ -498,6 +498,11 @@
           }
           carregouSenha = true;
           verificarEInicializar();
+      }, () => {
+          // Fallback: se houver erro de leitura/permissão, mantém senha padrão
+          senhaNuvem = '7424';
+          carregouSenha = true;
+          verificarEInicializar();
       });
 
       const inputSenhaAcesso = document.getElementById('input-senha-acesso');
@@ -524,6 +529,16 @@
       inputSenhaAcesso.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') tentarDesbloquear();
       });
+
+      // Fallback de disponibilidade: evita travar na tela de bloqueio
+      // caso o listener de senha não retorne por atraso/erro de rede.
+      setTimeout(() => {
+          if (!carregouSenha) {
+              senhaNuvem = '7424';
+              carregouSenha = true;
+              erroSenhaAcesso.textContent = 'Usando senha padrão temporária (7424).';
+          }
+      }, 3000);
 
       function verificarEInicializar() {
           if (carregouMateriais && carregouServicos && carregouSenha && sistemaDesbloqueado) {
