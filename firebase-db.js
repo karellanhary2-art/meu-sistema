@@ -14,30 +14,32 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// Força a função de salvar a ficar global no navegador
 window.salvarDadosNaNuvem = function(caminho, dados) {
     set(ref(db, caminho), dados);
 };
 
+// Sincroniza os materiais da nuvem garantindo compatibilidade com o script.js
 onValue(ref(db, 'marmoraria_materiais'), (snapshot) => {
     const dados = snapshot.val();
-    if (dados) {
-        window.materiais = dados;
-        if (typeof window.atualizarInterfaceMateriais === 'function') window.atualizarInterfaceMateriais();
+    window.materiais = dados || [];
+    if (typeof window.atualizarInterfaceMateriais === 'function') {
+        window.atualizarInterfaceMateriais();
     }
 });
 
 onValue(ref(db, 'marmoraria_servicos'), (snapshot) => {
     const dados = snapshot.val();
-    if (dados) {
-        window.servicos = dados;
-        if (typeof window.atualizarInterfaceServicos === 'function') window.atualizarInterfaceServicos();
+    window.servicos = dados || [];
+    if (typeof window.atualizarInterfaceServicos === 'function') {
+        window.atualizarInterfaceServicos();
     }
 });
 
 onValue(ref(db, 'marmoraria_orcamentos'), (snapshot) => {
     const dados = snapshot.val();
-    if (dados) {
-        window.orcamentos = dados;
-        if (typeof window.atualizarInterfaceOrcamentos === 'function') window.atualizarInterfaceOrcamentos();
+    window.orcamentos = dados || [];
+    if (typeof window.atualizarInterfaceOrcamentos === 'function') {
+        window.atualizarInterfaceOrcamentos();
     }
 });
