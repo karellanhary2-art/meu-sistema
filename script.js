@@ -3,18 +3,17 @@
 // ===== Módulo Materiais =====
 let materiais = [];
 let proximoIdMaterial = 1;
+window.materiais = materiais; // Compartilha com a nuvem
 
 function salvarMateriais() {
-    localStorage.setItem('marmoraria_materiais', JSON.stringify(materiais));
-    localStorage.setItem('marmoraria_proximoIdMaterial', proximoIdMaterial.toString());
+    window.salvarDadosNaNuvem('marmoraria_materiais', materiais);
+    window.salvarDadosNaNuvem('marmoraria_proximoIdMaterial', proximoIdMaterial);
 }
 
 function carregarMateriais() {
-    var dados = localStorage.getItem('marmoraria_materiais');
-    var id = localStorage.getItem('marmoraria_proximoIdMaterial');
-    if (dados) {
-        materiais = JSON.parse(dados);
-        proximoIdMaterial = id ? parseInt(id) : 1;
+    // Agora os dados vêm da nuvem automaticamente!
+    if (window.materiais && window.materiais.length > 0) {
+        materiais = window.materiais;
         return true;
     }
     return false;
@@ -23,18 +22,16 @@ function carregarMateriais() {
 // ===== Módulo Serviços =====
 let servicos = [];
 let proximoIdServico = 1;
+window.servicos = servicos; // Compartilha com a nuvem
 
 function salvarServicos() {
-    localStorage.setItem('marmoraria_servicos', JSON.stringify(servicos));
-    localStorage.setItem('marmoraria_proximoIdServico', proximoIdServico.toString());
+    window.salvarDadosNaNuvem('marmoraria_servicos', servicos);
+    window.salvarDadosNaNuvem('marmoraria_proximoIdServico', proximoIdServico);
 }
 
 function carregarServicos() {
-    var dados = localStorage.getItem('marmoraria_servicos');
-    var id = localStorage.getItem('marmoraria_proximoIdServico');
-    if (dados) {
-        servicos = JSON.parse(dados);
-        proximoIdServico = id ? parseInt(id) : 1;
+    if (window.servicos && window.servicos.length > 0) {
+        servicos = window.servicos;
         return true;
     }
     return false;
@@ -43,32 +40,28 @@ function carregarServicos() {
 // ===== Módulo Orçamentos =====
 let orcamentos = [];
 let proximoIdOrcamento = 1;
-let orcamentoAtualId = null; // ID do orçamento atualmente sendo editado
+let orcamentoAtualId = null; 
+window.orcamentos = orcamentos; // Compartilha com a nuvem
 
 function salvarOrcamentos() {
-    localStorage.setItem('marmoraria_orcamentos', JSON.stringify(orcamentos));
-    localStorage.setItem('marmoraria_proximoIdOrcamento', proximoIdOrcamento.toString());
-    localStorage.setItem('marmoraria_orcamentoAtualId', orcamentoAtualId ? orcamentoAtualId.toString() : '');
+    window.salvarDadosNaNuvem('marmoraria_orcamentos', orcamentos);
+    window.salvarDadosNaNuvem('marmoraria_proximoIdOrcamento', proximoIdOrcamento);
+    window.salvarDadosNaNuvem('marmoraria_orcamentoAtualId', orcamentoAtualId || 0);
 }
 
 function carregarOrcamentos() {
-    var dados = localStorage.getItem('marmoraria_orcamentos');
-    var id = localStorage.getItem('marmoraria_proximoIdOrcamento');
-    var atualId = localStorage.getItem('marmoraria_orcamentoAtualId');
-    if (dados) {
-        orcamentos = JSON.parse(dados);
-        proximoIdOrcamento = id ? parseInt(id) : 1;
-        orcamentoAtualId = atualId ? parseInt(atualId) : null;
+    if (window.orcamentos && window.orcamentos.length > 0) {
+        orcamentos = window.orcamentos;
         return true;
     }
     return false;
 }
 
-// Função para limpar o orçamento atual (ao criar novo)
 function novoOrcamento() {
     orcamentoAtualId = null;
     salvarOrcamentos();
 }
+
 
 // Variáveis globais para acesso pelas funções
 var toolbarGlobal = null;
