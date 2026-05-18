@@ -467,9 +467,104 @@
           console.error('Falha ao inicializar Firebase. Usando fallback local.', e);
       }
 
-      window.salvarDadosNaNuvem = function(caminho, dados) {
+      const CHAVE_SESSAO_LOGIN = 'marmoraria_login_expira_em';
+      const CHAVE_SESSAO_CRIPTO = 'marmoraria_chave_mestra_sessao';
+      const DURACAO_SESSAO_MS = 30 * 60 * 1000; // 30 minutos
+      const ITERACOES_PBKDF2 = 150000;
+      const SALT_CRIPTO = 'marmoraria-v1-salt';
+
+      let chaveMestraDigitada = null; // Mantida somente em memória (sessão atual da página)
+
+      const encoder = new TextEncoder();
+      const decoder = new TextDecoder();
+
+      function bytesParaBase64(bytes) {
+          let binario = '';
+          bytes.forEach((b) => { binario += String.fromCharCode(b); });
+          return btoa(binario);
+      }
+
+      function base64ParaBytes(base64) {
+          const binario = atob(base64);
+          const bytes = new Uint8Array(binario.length);
+          for (let i = 0; i < binario.length; i++) bytes[i] = binario.charCodeAt(i);
+          return bytes;
+      }
+
+      async function derivarChaveCryptoAPartirDaSenha(senha) {
+          if (!senha) throw new Error('Senha/chave mestra não informada.');
+          const keyMaterial = await crypto.subtle.importKey(
+              'raw',
+              encoder.encode(senha),
+              'PBKDF2',
+              false,
+              ['deriveKey']
+          );
+
+          return crypto.subtle.deriveKey(
+              {
+                  name: 'PBKDF2',
+                  salt: encoder.encode(SALT_CRIPTO),
+                  iterations: ITERACOES_PBKDF2,
+                  hash: 'SHA-256'
+              },
+              keyMaterial,
+              { name: 'AES-GCM', length: 256 },
+              false,
+              ['encrypt', 'decrypt']
+          );
+      }
+
+      async function criptografarDadosComSenha(dados, senha) {
+          const chave = await derivarChaveCryptoAPartirDaSenha(senha);
+          const iv = crypto.getRandomValues(new Uint8Array(12));
+          const textoPlano = JSON.stringify(dados);
+          const cifrado = await crypto.subtle.encrypt(
+              { name: 'AES-GCM', iv },
+              chave,
+              encoder.encode(textoPlano)
+          );
+
+          return {
+              __enc: true,
+              alg: 'AES-GCM',
+              iv: bytesParaBase64(iv),
+              data: bytesParaBase64(new Uint8Array(cifrado))
+          };
+      }
+
+      async function descriptografarDadosComSenha(payload, senha) {
+          if (!payload || payload.__enc !== true) return payload;
+          const chave = await derivarChaveCryptoAPartirDaSenha(senha);
+          const iv = base64ParaBytes(payload.iv);
+          const data = base64ParaBytes(payload.data);
+
+          const textoPlanoBuffer = await crypto.subtle.decrypt(
+              { name: 'AES-GCM', iv },
+              chave,
+              data
+          );
+
+          return JSON.parse(decoder.decode(textoPlanoBuffer));
+      }
+
+      window.salvarDadosNaNuvem = async function(caminho, dados) {
           if (!db) return;
-          set(ref(db, caminho), dados);
+
+          // Senha de acesso é armazenada em texto simples para validar o desbloqueio.
+          // Demais dados são criptografados com a chave digitada pelo usuário.
+          if (caminho === 'marmoraria_config/senha') {
+              await set(ref(db, caminho), dados);
+              return;
+          }
+
+          if (!chaveMestraDigitada) {
+              console.warn('Tentativa de salvar sem chave mestra em memória.');
+              return;
+          }
+
+          const payload = await criptografarDadosComSenha(dados, chaveMestraDigitada);
+          await set(ref(db, caminho), payload);
       };
 
       let carregouMateriais = false;
@@ -477,16 +572,20 @@
       let carregouSenha = false;
       let senhaNuvem = '7424';
       let sistemaDesbloqueado = false;
-      const CHAVE_SESSAO_LOGIN = 'marmoraria_login_expira_em';
-      const DURACAO_SESSAO_MS = 30 * 60 * 1000; // 30 minutos
 
       if (!db) {
           carregouMateriais = true;
           carregouServicos = true;
           carregouSenha = true;
       } else {
-          onValue(ref(db, 'marmoraria_materiais'), (snapshot) => {
-              window.materiais = snapshot.val() || [];
+          onValue(ref(db, 'marmoraria_materiais'), async (snapshot) => {
+              try {
+                  const bruto = snapshot.val();
+                  window.materiais = chaveMestraDigitada ? (await descriptografarDadosComSenha(bruto, chaveMestraDigitada) || []) : [];
+              } catch (e) {
+                  console.error('Falha ao descriptografar materiais.', e);
+                  window.materiais = [];
+              }
               carregouMateriais = true;
               if (typeof window.inicializarSistemaMarmoraria === 'function') {
                   window.inicializarSistemaMarmoraria();
@@ -494,8 +593,14 @@
               verificarEInicializar();
           });
 
-          onValue(ref(db, 'marmoraria_servicos'), (snapshot) => {
-              window.servicos = snapshot.val() || [];
+          onValue(ref(db, 'marmoraria_servicos'), async (snapshot) => {
+              try {
+                  const bruto = snapshot.val();
+                  window.servicos = chaveMestraDigitada ? (await descriptografarDadosComSenha(bruto, chaveMestraDigitada) || []) : [];
+              } catch (e) {
+                  console.error('Falha ao descriptografar serviços.', e);
+                  window.servicos = [];
+              }
               carregouServicos = true;
               if (typeof window.inicializarSistemaMarmoraria === 'function') {
                   window.inicializarSistemaMarmoraria();
@@ -503,8 +608,14 @@
               verificarEInicializar();
           });
 
-          onValue(ref(db, 'marmoraria_orcamentos'), (snapshot) => {
-              window.orcamentos = snapshot.val() || [];
+          onValue(ref(db, 'marmoraria_orcamentos'), async (snapshot) => {
+              try {
+                  const bruto = snapshot.val();
+                  window.orcamentos = chaveMestraDigitada ? (await descriptografarDadosComSenha(bruto, chaveMestraDigitada) || []) : [];
+              } catch (e) {
+                  console.error('Falha ao descriptografar orçamentos.', e);
+                  window.orcamentos = [];
+              }
               if (typeof window.inicializarSistemaMarmoraria === 'function') {
                   window.inicializarSistemaMarmoraria();
               }
@@ -546,14 +657,20 @@
       }
 
       function aplicarEstadoInicialDeAcesso() {
-          if (sessaoAindaValida()) {
+          const chaveSessao = sessionStorage.getItem(CHAVE_SESSAO_CRIPTO) || '';
+
+          // Se a aba foi apenas atualizada (F5), reaproveita a senha da sessão.
+          if (chaveSessao) {
+              chaveMestraDigitada = chaveSessao;
               sistemaDesbloqueado = true;
               telaBloqueio.style.display = 'none';
               erroSenhaAcesso.textContent = '';
-          } else {
-              sistemaDesbloqueado = false;
-              telaBloqueio.style.display = 'flex';
+              return;
           }
+
+          sistemaDesbloqueado = false;
+          telaBloqueio.style.display = 'flex';
+          erroSenhaAcesso.textContent = '';
       }
 
       aplicarEstadoInicialDeAcesso();
@@ -568,6 +685,8 @@
 
           // Valida contra senha da nuvem; se indisponível, senha padrão 7424.
           if (senhaDigitada === (senhaNuvem || '7424')) {
+              chaveMestraDigitada = senhaDigitada;
+              sessionStorage.setItem(CHAVE_SESSAO_CRIPTO, senhaDigitada);
               sistemaDesbloqueado = true;
               renovarSessaoLogin();
               telaBloqueio.style.display = 'none';
